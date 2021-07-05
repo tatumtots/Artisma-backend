@@ -1,46 +1,41 @@
 var express = require('express');
 var router = express.Router();
 const User = require("../models/users");
-const crypto = require("crypto");
+const passport = require("passport");
+const authenticate = require("../authenticate");
+
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   res.send('respond with a resource');
 });
 
-//New user signup. Requires username, email, and password in the request body. Email must be unique.
+//Token authentication. Needs a unique email address added as a requirement.
 router.post("/signup", (req, res, next) => {
-  User.findOne({email: req.body.email})
-  .then(user => {
-    if(user) {
-      const err = new Error(`A user already exists for ${req.body.email}. Please sign in or reset password.`);
-      err.status = 403;
-      return next(err);
-    } else {
-      const salt = crypto.randomBytes(32).toString("base64");
-      crypto.pbkdf2(req.body.password, salt, 100, 32, "sha1", (err, derivedKey) => {
-        if(!err) {
-          User.create({
-            username: req.body.username,
-            email: req.body.email,
-            salt: salt,
-            password: derivedKey
-          })
-          .then(user => {
-            res.statusCode = 200;
-            res.setHeader("Content-Type", "application/json");
-            res.json({status: "Registration Successful"})
-          })
-          .catch(err => next(err));
-        } else {
-          const err = new Error(`Server-side encription error`);
-          err.status = 500;
-          next(err);
-        }
-      });
+  User.register(
+    new User({username: req.body.username}),
+    req.body.password,
+    err => {
+      if(err) {
+        res.statusCode = 500;
+        res.setHeader("Content-Type", "application/json");
+        res.json({err: err});
+      } else {
+        passport.authenticate("local")(req, res, () => {
+          res.statusCode = 200;
+          res.setHeader("Content-Type", "application/json");
+          res.json({success: true, status: "Artisma Registration Successful"});
+        });
+      }
     }
-  })
-  .catch(err => next(err));
+  )
+});
+
+router.post("/login", passport.authenticate("local"), (req, res) => {
+  const token = authenticate.getToken({_id: req.user._id});
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "application/json");
+  res.json({successs: true, token: token, status: "You are successfully logged in to Artisma"});
 });
 
 module.exports = router;
