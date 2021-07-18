@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const imageSchema = new Schema({
-    location: {
+    name: {
         type: String,
         required: true,
     },
@@ -15,6 +15,11 @@ const imageSchema = new Schema({
         min: 0,
         max: 3000,
         default: 1000
+    },
+    img:
+    {
+        data: Buffer,
+        contentType: String
     }
 }, {
     timestamps: true
