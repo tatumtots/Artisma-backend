@@ -39,4 +39,11 @@ router.post("/login", passport.authenticate("local"), (req, res) => {
   res.json({successs: true, token: token, status: "You are successfully logged in to Artisma"});
 });
 
+router.route('/logintest')
+    .post(authenticate.verifyUser, (req, res, next) => {
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "application/json");
+      res.json({successs: true, token: token, status: "You are already logged in to Artisma"});
+    });
+
 module.exports = router;
