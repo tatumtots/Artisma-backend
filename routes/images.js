@@ -6,7 +6,6 @@ const Image = require("../models/images");
 
 var http = require('http'),
     inspect = require('util').inspect;
-const { authorize } = require('passport');
 
 
 router.route('/')
