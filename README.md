@@ -2,14 +2,14 @@
 
 Implemented:
 Basic schemas for Images and Users
+Database hosted on AWS via mongoDB Atlas
 User signup
 * Uses email as unique identifier
-* Securely salts and hashes password
+* Token based passport authentication
 
 Unimplemented:
-* Connectivity to an actual database
-* User Login and authentication
 * User password reset
+* User email update
 * Image upload
 * Image response
 * and more... (not intended to be an exhaustive list)

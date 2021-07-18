@@ -31,6 +31,7 @@ router.post("/signup", (req, res, next) => {
   )
 });
 
+//requires username and password in the body of the request
 router.post("/login", passport.authenticate("local"), (req, res) => {
   const token = authenticate.getToken({_id: req.user._id});
   res.statusCode = 200;
