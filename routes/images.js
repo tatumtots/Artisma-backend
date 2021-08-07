@@ -5,7 +5,10 @@ const authenticate = require("../authenticate");
 const Image = require("../models/images");
 
 var http = require('http'),
-    inspect = require('util').inspect;
+    inspect = require('util').inspect,
+    path = require('path'),
+    os = require('os'),
+    fs = require('fs');
 
 
 router.route('/')
@@ -22,6 +25,8 @@ router.route('/')
 
         busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
             console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype);
+            var saveTo = path.join("", path.basename(fieldname));
+            file.pipe(fs.createWriteStream(saveTo));
             file.on('data', function(data) {
               console.log('File [' + fieldname + '] got ' + data.length + ' bytes');
             });
@@ -33,14 +38,14 @@ router.route('/')
                     //The "file" object does not upload successfully, and may not actually contain the file
                     Image.create({
                         name: name,
-                        img: file,
+                        img: fs.createWriteStream(saveTo),
                         owner: req.user._id
                     })
                     .then(image => {
                         console.log("Image Uploaded: ", image)
                         res.statusCode = 200;
                         res.setHeader("Content-Type", "application/json");
-                        res.json(Image);
+                        res.json(image);
                     })
                 }
               console.log('File [' + fieldname + '] Finished');
@@ -48,11 +53,11 @@ router.route('/')
           });
           
           //On successful upload, shoud exit before reaching this
-          busboy.on('finish', function() {
-            console.log('Reached Finish');
-            res.writeHead(303, { Connection: 'close', Location: '/' });
-            res.end();
-          });
+          // busboy.on('finish', function() {
+          //   console.log('Reached Finish');
+          //   res.writeHead(303, { Connection: 'close', Location: '/' });
+          //   res.end();
+          // });
 
           req.pipe(busboy);
 
